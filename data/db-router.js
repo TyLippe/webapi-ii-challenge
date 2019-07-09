@@ -143,28 +143,25 @@ router.delete('/:id', (req, res) => {
 
 //Put update
 router.put('/:id', (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id;
     const updates = req.body;
 
-    Data.findById(id)
-        .then(found => {
-            if(!found) {
-                res.status(404).json({ message: "The post with the specified ID does not exist." })
-            } else {
-                Data.update(updates)
-                    .then(update => {
-                        if(isValidPost) {
-                            res.status(201).json(update)
-                        } else {
-                            res.status(400).json({ message: "The post with the specified ID does not exist." })
-                        }
-                    })
-                    .catch(err => {
-                        res.status(500).json({ error: "The post information could not be modified." })
-                    })
-            }
-        })
-})
+    if (isValidPost) {
+        Data.update(id, updates)
+            .then(updated => {
+                if (updated) {
+                    res.status(200).json(updates).end();
+                } else {
+                    res.status(404).json({ message: "The post with the specified ID does not exist." })
+                }
+            })
+            .catch(err => {
+                res.status(500).json({ error: "The post information could not be modified." });
+            });
+        } else {
+            res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+        }
+    })
 
 
 function isValidPost(post) {
